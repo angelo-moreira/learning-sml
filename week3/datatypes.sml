@@ -11,8 +11,3 @@ val c = Pizza
 val d = Date (20, 10, 2017)
 val e = a
 
-
-datatype suit = Club | Diamond | Heart | Spade
-datatype rank = Jack | Queen | King |
-                Ace | Num of int
-
