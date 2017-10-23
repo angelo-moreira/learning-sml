@@ -59,13 +59,15 @@ val months = ["January", "February", "March", "April", "May", "June", "July", "A
 fun date_to_string (date: int*int*int) =
     get_nth (months, #2 date) ^ " " ^ Int.toString(#3 date) ^ ", " ^ Int.toString(#1 date)
 
-fun sum_numbers (sum: int, numbers_list: int list, counter: int) =
-    if sum <= (counter+ (hd numbers_list) + (hd (tl numbers_list)))
-        then hd numbers_list
-        else sum_numbers (sum, tl numbers_list, counter+(hd numbers_list))
+fun sum_numbers (sum: int, numbers_list: int list, acc: int, counter: int) =
+    if sum <= (acc + (hd numbers_list) + (hd (tl numbers_list)))
+    then counter
+    else sum_numbers (sum, tl numbers_list, acc+(hd numbers_list), counter + 1)
 
 fun number_before_reaching_sum (sum: int, numbers_list: int list) =
-    sum_numbers (sum, numbers_list, 0)
+    if null (tl numbers_list)
+    then 0
+    else sum_numbers (sum, numbers_list, 0, 1)
 
 val number_of_days_in_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
@@ -85,7 +87,7 @@ fun print_months_between (day1: int, day2: int, days_months: int list , months_b
         else print_months_between (day1+1, day2, days_months, months_between@[ find_month(day1, days_months, 0, 1) ])
 
 fun month_range(day1: int, day2: int) =
-    if day1 > day2
+    if day1 > day2 orelse day1 = day2
     then []
     else
         let
