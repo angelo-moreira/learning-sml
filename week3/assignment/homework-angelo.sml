@@ -49,6 +49,21 @@ fun get_substitutions2 (list_words: string list list, s: string) =
             | list_words => get_words (list_words, s, [])
     end
 
+val full_name = {first="Fred", middle="W", last="Smith"}
+
+fun similar_names (words: string list list, name: {first: string, middle: string, last: string}) =
+    let
+        fun convert_names (names_to_convert: string list, { middle: string, last: string }) =
+            case names_to_convert of
+                [] => []
+                | to_convert_hd::to_convert_tl => [{ first=to_convert_hd, last=last, middle=middle }]@convert_names (to_convert_tl, { middle=middle, last=last })
+    in
+        case name of
+            { first, middle, last } => [{ first=first, middle=middle, last=last }]@convert_names (get_substitutions2 (words, first), { middle=middle, last=last })
+    end
+
+
+
 
 (* you may assume that Num is always used with values 2, 3, ..., 10
    though it will not really come up *)
@@ -59,6 +74,31 @@ type card = suit * rank
 datatype color = Red | Black
 datatype move = Discard of card | Draw 
 
-exception IllegalMove
+(* exception IllegalMove *)
 
 (* put your solutions for problem 2 here *)
+
+fun card_color ((s: suit, _)) =
+    case s of
+        (Clubs | Spades) => Black
+        | _ => Red
+
+fun card_value ((_, r:rank)) =
+    case r of
+        Ace => 11
+        | (King | Queen | Jack) => 10
+        | (Num i) => i
+
+(* 
+datatype sng = P | N | Z
+
+fun multsign (x1, x2) =
+    let fun sign x = if x=0 then Z else if x>0 then P else N
+    in
+        case (sign x1, sign x2) of
+            (Z, _) => Z
+            | (_, Z) => Z
+            | (P, P) => P
+            | (N, N) => P
+            | (_) => N
+    end *)
