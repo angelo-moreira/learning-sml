@@ -71,10 +71,10 @@ datatype suit = Clubs | Diamonds | Hearts | Spades
 datatype rank = Jack | Queen | King | Ace | Num of int 
 type card = suit * rank
 
-datatype color = Red | Black
+datatype color = Red | Black | Green
 datatype move = Discard of card | Draw 
 
-(* exception IllegalMove *)
+exception IllegalMove
 
 (* put your solutions for problem 2 here *)
 
@@ -89,16 +89,29 @@ fun card_value ((_, r:rank)) =
         | (King | Queen | Jack) => 10
         | (Num i) => i
 
-(* 
-datatype sng = P | N | Z
+val cards_sample = [(Hearts, Ace), (Spades, Num 3), (Clubs, Queen)];
 
-fun multsign (x1, x2) =
-    let fun sign x = if x=0 then Z else if x>0 then P else N
-    in
-        case (sign x1, sign x2) of
-            (Z, _) => Z
-            | (_, Z) => Z
-            | (P, P) => P
-            | (N, N) => P
-            | (_) => N
-    end *)
+fun remove_card (cs: card list, c: card, e) =
+    case cs of
+        cs::cs' => (case cs=c of true => remove_card (cs', c, e) | false => cs::remove_card (cs', c, e))
+        | _ => cs
+
+
+(* fun all_same_color_helper (cs: card list, prev_color: color) =
+    case cs of
+        (s, r)::cs' => (case card_color (s,r) = prev_color of
+                            true => all_same_color_helper (cs', card_color (s,r))
+                            | false => false)
+        | _ => true
+
+fun all_same_color (cs: card list) =
+    case cs of
+        (s, r)::cs' => all_same_color_helper (cs', card_color (s,r))
+        | _ => true *)
+
+fun all_same_color (cs: card list) =
+    case cs of
+        [] => true
+        | _::[] => true
+        | head::(neck::rest) => card_color (head) = card_color (neck)
+                                andalso all_same_color (neck::rest)
