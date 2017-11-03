@@ -96,22 +96,48 @@ fun remove_card (cs: card list, c: card, e) =
         cs::cs' => (case cs=c of true => remove_card (cs', c, e) | false => cs::remove_card (cs', c, e))
         | _ => cs
 
-
-(* fun all_same_color_helper (cs: card list, prev_color: color) =
-    case cs of
-        (s, r)::cs' => (case card_color (s,r) = prev_color of
-                            true => all_same_color_helper (cs', card_color (s,r))
-                            | false => false)
-        | _ => true
-
-fun all_same_color (cs: card list) =
-    case cs of
-        (s, r)::cs' => all_same_color_helper (cs', card_color (s,r))
-        | _ => true *)
-
 fun all_same_color (cs: card list) =
     case cs of
         [] => true
         | _::[] => true
         | head::(neck::rest) => card_color (head) = card_color (neck)
                                 andalso all_same_color (neck::rest)
+
+fun sum_cards (cs: card list) =
+    let
+        fun sum_cards_helper (cs: card list, acc: int) =
+            case cs of
+                [] => acc
+                | c::cs' => sum_cards_helper (cs', acc + card_value(c))
+    in
+        sum_cards_helper (cs, 0)
+    end
+
+fun preliminary_score (sum: int, goal: int) =
+    case (sum > goal) of
+        true => 3 * (sum - goal)
+        | false => (goal - sum)
+
+fun score (cs: card list, goal: int) =
+    case all_same_color (cs) of
+        true => preliminary_score (sum_cards (cs), goal) div 2
+        | false => preliminary_score (sum_cards (cs), goal)
+
+fun discard_card (needle: card, cs: card list, e) =
+    case cs of
+        (c::cs') => (case c = needle of
+                        true => cs'
+                        | false => c::discard_card (needle, cs', e))
+        | _ => raise e
+
+fun officiate (cs: card list, ms: move list, goal: int) =
+    let
+        fun state_of_game (cs: card list, ms: move list, g: int, cards_held: card list) =
+            case (ms, cs, sum_cards(cards_held) > g) of
+                (_, c::cs, true) => score (cards_held, g)
+                | ( ((Discard i)::ms'), _, _) => state_of_game (cs, ms', goal, discard_card(i, cards_held, IllegalMove))
+                | ((m::ms'), (c::cs'), _) => state_of_game (cs', ms', goal, cards_held@[c])
+                | _ => score (cards_held, g)
+    in
+        state_of_game (cs, ms, goal, [])
+    end
