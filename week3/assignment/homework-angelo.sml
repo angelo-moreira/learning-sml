@@ -1,5 +1,3 @@
-(* Dan Grossman, Coursera PL, HW2 Provided Code *)
-
 (* if you use this function to compare two strings (returns true if the same
    string), then you avoid several of the functions in problem 1 having
    polymorphic types that may be confusing *)
@@ -9,45 +7,36 @@ fun same_string(s1 : string, s2 : string) =
 (* put your solutions for problem 1 here *)
 
 fun all_except_option (to_remove: string, xs) =
-    let fun remove_string (to_remove, xs) =
-        case xs of
-            [] => []
-            | xs::xs' => (case same_string (to_remove, xs) of
-                            true => remove_string (to_remove, xs')
-                            | false => [xs]@remove_string (to_remove, xs'))
+    let 
+        fun remove_string (to_remove, xs) =
+            case xs of
+                x::xs' => (case same_string (to_remove, x) of
+                                true => remove_string (to_remove, xs')
+                                | false => [x]@remove_string (to_remove, xs'))
+                | []  => []
+        val new_list = remove_string (to_remove, xs);
     in 
-        case xs of
-            [] => NONE
-            | xs::xs' => SOME (remove_string (to_remove, (xs::xs')))
+        case xs = new_list of
+            true => NONE
+            | false => SOME (new_list)
     end
 
-val a = [["Fred","Fredrick"],["Elizabeth","Betty"],["Freddie","Fred","F"]]
-val b = ["Freddie","Fred","F"]
+fun get_substitutions1 (ws: string list list, s: string) =
+    case ws of
+        w::ws' => (case all_except_option (s, w) of
+                    SOME words => words@get_substitutions1(ws', s)
+                    | NONE => get_substitutions1(ws', s))
+        | _ => []
 
-fun get_substitutions1 (list_words: string list list, s: string) =
-    case list_words of
-        [] => []
-        | list_words::rest => case all_except_option (s, list_words) of
-                                SOME words => case words = list_words of
-                                                true => get_substitutions1(rest, s)
-                                                | false => words@get_substitutions1(rest, s)
-
-fun get_substitutions2 (list_words: string list list, s: string) =
+fun get_substitutions2 (ws: string list list, s: string) =
     let
-        fun get_words (list_words: string list list, s, acc_matches: string list) =
-            case list_words of
-                [] => acc_matches
-                | words::rest =>
-                    case all_except_option (s, words) of
-                        SOME matches => 
-                            (case matches = words of
-                                true => get_words (rest, s, acc_matches)
-                                | false => get_words (rest, s, acc_matches@matches))
-    in
-        case list_words of
-            [] => []
-            | list_words => get_words (list_words, s, [])
-    end
+        fun get_words (ws: string list list, s: string, acc: string list) =
+            case ws of
+                w::ws' => (case all_except_option (s, w) of
+                            SOME words => get_words (ws', s, acc@words)
+                            | NONE => get_words (ws', s, acc))
+                | _ => acc
+    in get_words (ws, s, []) end
 
 val full_name = {first="Fred", middle="W", last="Smith"}
 
@@ -71,7 +60,7 @@ datatype suit = Clubs | Diamonds | Hearts | Spades
 datatype rank = Jack | Queen | King | Ace | Num of int 
 type card = suit * rank
 
-datatype color = Red | Black | Green
+datatype color = Red | Black
 datatype move = Discard of card | Draw 
 
 exception IllegalMove
@@ -89,12 +78,12 @@ fun card_value ((_, r:rank)) =
         | (King | Queen | Jack) => 10
         | (Num i) => i
 
-val cards_sample = [(Hearts, Ace), (Spades, Num 3), (Clubs, Queen)];
-
 fun remove_card (cs: card list, c: card, e) =
     case cs of
-        cs::cs' => (case cs=c of true => remove_card (cs', c, e) | false => cs::remove_card (cs', c, e))
-        | _ => cs
+        (c'::cs') => (case c' = c of
+                        true => cs'
+                        | false => c::remove_card (cs', c, e))
+        | _ => raise e
 
 fun all_same_color (cs: card list) =
     case cs of
@@ -123,21 +112,12 @@ fun score (cs: card list, goal: int) =
         true => preliminary_score (sum_cards (cs), goal) div 2
         | false => preliminary_score (sum_cards (cs), goal)
 
-fun discard_card (needle: card, cs: card list, e) =
-    case cs of
-        (c::cs') => (case c = needle of
-                        true => cs'
-                        | false => c::discard_card (needle, cs', e))
-        | _ => raise e
-
 fun officiate (cs: card list, ms: move list, goal: int) =
     let
         fun state_of_game (cs: card list, ms: move list, g: int, cards_held: card list) =
             case (ms, cs, sum_cards(cards_held) > g) of
                 (_, c::cs, true) => score (cards_held, g)
-                | ( ((Discard i)::ms'), _, _) => state_of_game (cs, ms', goal, discard_card(i, cards_held, IllegalMove))
+                | ( ((Discard i)::ms'), _, _) => state_of_game (cs, ms', goal, remove_card(cards_held, i, IllegalMove))
                 | ((m::ms'), (c::cs'), _) => state_of_game (cs', ms', goal, cards_held@[c])
                 | _ => score (cards_held, g)
-    in
-        state_of_game (cs, ms, goal, [])
-    end
+    in state_of_game (cs, ms, goal, []) end
