@@ -35,6 +35,9 @@ val valid_drawing = officiate ([(Clubs, Ace),(Clubs, Num 8),(Diamonds, King)], [
 val passed_goal = officiate ([(Clubs, Ace),(Clubs, Num 8),(Diamonds, King)], [Draw, Draw, Draw], 20) = 27
 val passed_goal_but_same_colour = officiate ([(Clubs, Ace),(Clubs, Num 8),(Spades, King)], [Draw, Draw, Draw], 20) = 13
 
+val before_goal = officiate ([(Clubs, Num 2),(Clubs, Num 4),(Spades, Num 8), (Hearts, Num 4)], [Draw, Draw, Draw, Draw], 20) = 2
+val short_cards = officiate ([(Clubs, Num 2),(Diamonds, Num 4),(Spades, Num 8)], [Draw, Draw, Draw, Draw], 20) = 6
+
 
 (* val test12 = officiate ([(Clubs,Ace),(Spades,Ace),(Clubs,Ace),(Spades,Ace)],
                         [Draw,Draw,Draw,Draw,Draw],
