@@ -49,4 +49,9 @@ val longest_string4 = fn xs => longest_string_helper (fn (x,y) => x >= y) xs ""
 
 val longest_capitalized = longest_string3 o only_capitals
 
-(* 4 !> (fn x => x+1) !> (fn y => y+2) !> (fn x => x+3); *)
+exception NoAnswer
+fun first_answer f xs = 
+        (List.find (fn x => case f(x) of SOME _ => true |_ => false ) xs) 
+        !> (fn x => case x of SOME i => i |_ => raise NoAnswer)
+
+
