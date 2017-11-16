@@ -39,19 +39,20 @@ infix !>
 fun x !> f = f x
 
 fun only_capitals sl = List.filter (fn x => String.sub(x, 0) !> Char.isUpper) sl
-fun longest_string1 xs = List.foldl (fn (x, y) => if String.size (x) > String.size (y) then x else y) "" xs;
-fun longest_string2 xs = List.foldl (fn (x, y) => if String.size (x) >= String.size (y) then x else y) "" xs;
+fun longest_string1 xs = List.foldl (fn (x, y) => if size x > size y then x else y) "" xs;
+fun longest_string2 xs = List.foldl (fn (x, y) => if size x >= size y then x else y) "" xs;
 
-fun longest_string_helper f xs s = List.foldl (fn (x, y) => if f (String.size(x),String.size(y)) = true then x else y) s xs
+fun longest_string_helper f xs s = List.foldl (fn (x, y) => if f (size x,size y) = true then x else y) s xs
 
 val longest_string3 = fn xs => longest_string_helper (fn (x,y) => x > y) xs ""
 val longest_string4 = fn xs => longest_string_helper (fn (x,y) => x >= y) xs ""
 
 val longest_capitalized = longest_string3 o only_capitals
 
+val rev_string = implode o rev o explode
+
 exception NoAnswer
 fun first_answer f xs = 
         (List.find (fn x => case f(x) of SOME _ => true |_ => false ) xs) 
         !> (fn x => case x of SOME i => i |_ => raise NoAnswer)
-
 

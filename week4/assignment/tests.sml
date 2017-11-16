@@ -17,7 +17,7 @@ val test4b = longest_string4 ["A","B","C"] = "C"
 
 val test5 = longest_capitalized ["A","bc","C"] = "A"
 
-(* val test6 = rev_string "abc" = "cba" *)
+val test6 = rev_string "abc" = "cba"
 
 val test7 = first_answer (fn x => if x > 3 then SOME x else NONE) [1,2,3,4,5] = 4
 
