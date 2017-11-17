@@ -56,3 +56,7 @@ fun first_answer f xs =
         (List.find (fn x => case f(x) of SOME _ => true |_ => false ) xs) 
         !> (fn x => case x of SOME i => i |_ => raise NoAnswer)
 
+fun all_answers f xs =
+        case List.filter (fn x => case f x of SOME _ => true |_ => false) xs of
+        [] => NONE
+        | cs => SOME cs
