@@ -62,3 +62,5 @@ datatype typ = Anything
 
 fun count_wildcards (p: pattern) = g (fn x => 1) (fn x => 0) p
 fun count_wild_and_variable_lengths (p: pattern) = g (fn x => 1) (fn x => size (x)) p
+
+fun count_some_var (s, p) = g (fn x => 0) (fn x => if x = s then 1 else 0) p
