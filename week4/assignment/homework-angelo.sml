@@ -1,6 +1,31 @@
-(* Coursera Programming Languages, Homework 3, Provided Code *)
 
 exception NoAnswer
+
+infix !>
+fun x !> f = f x
+
+fun only_capitals sl = List.filter (fn x => String.sub(x, 0) !> Char.isUpper) sl
+fun longest_string1 xs = List.foldl (fn (x, y) => if size x > size y then x else y) "" xs;
+fun longest_string2 xs = List.foldl (fn (x, y) => if size x >= size y then x else y) "" xs;
+
+fun longest_string_helper f xs s = List.foldl (fn (x, y) => if f (size x,size y) = true then x else y) s xs
+
+val longest_string3 = fn xs => longest_string_helper (fn (x,y) => x > y) xs ""
+val longest_string4 = fn xs => longest_string_helper (fn (x,y) => x >= y) xs ""
+
+val longest_capitalized = longest_string3 o only_capitals
+
+val rev_string = implode o rev o explode
+
+fun first_answer f xs = 
+        (List.find (fn x => case f(x) of SOME _ => true |_ => false ) xs) 
+        !> (fn x => case x of SOME i => i |_ => raise NoAnswer)
+
+fun all_answers f xs =
+        case List.filter (fn x => case f x of SOME _ => true |_ => false) xs of
+        [] => NONE
+        | cs => SOME cs
+
 
 datatype pattern = Wildcard
      | Variable of string
@@ -19,12 +44,13 @@ fun g f1 f2 p =
         val r = g f1 f2 
     in
         case p of
-            Wildcard          => f1 ()
+            Wildcard            => f1 ()
             | Variable x        => f2 x
             | TupleP ps         => List.foldl (fn (p,i) => (r p) + i) 0 ps
             | ConstructorP(_,p) => r p
             | _                 => 0
     end
+
 
 (**** for the challenge problem only ****)
 
@@ -34,29 +60,5 @@ datatype typ = Anything
        | TupleT of typ list
        | Datatype of string
 
-(**** you can put all your code here ****)
-infix !>
-fun x !> f = f x
-
-fun only_capitals sl = List.filter (fn x => String.sub(x, 0) !> Char.isUpper) sl
-fun longest_string1 xs = List.foldl (fn (x, y) => if size x > size y then x else y) "" xs;
-fun longest_string2 xs = List.foldl (fn (x, y) => if size x >= size y then x else y) "" xs;
-
-fun longest_string_helper f xs s = List.foldl (fn (x, y) => if f (size x,size y) = true then x else y) s xs
-
-val longest_string3 = fn xs => longest_string_helper (fn (x,y) => x > y) xs ""
-val longest_string4 = fn xs => longest_string_helper (fn (x,y) => x >= y) xs ""
-
-val longest_capitalized = longest_string3 o only_capitals
-
-val rev_string = implode o rev o explode
-
-exception NoAnswer
-fun first_answer f xs = 
-        (List.find (fn x => case f(x) of SOME _ => true |_ => false ) xs) 
-        !> (fn x => case x of SOME i => i |_ => raise NoAnswer)
-
-fun all_answers f xs =
-        case List.filter (fn x => case f x of SOME _ => true |_ => false) xs of
-        [] => NONE
-        | cs => SOME cs
+fun count_wildcards (p: pattern) = g (fn x => 1) (fn x => 0) p
+fun count_wild_and_variable_lengths (p: pattern) = g (fn x => 1) (fn x => size (x)) p
