@@ -72,9 +72,6 @@ fun all_variable_names p =
         | TupleP ps => List.foldl (fn (p, acc) => all_variable_names(p)@acc) [] ps
         | _         => []
 
-fun has_duplicates (x::xs') =
-    if (List.exists (fn y => x=y) xs') = true then true else has_duplicates xs'
-| has_duplicates (_) = false
+fun has_duplicates xs = List.exists (fn x => List.length (List.filter (fn y => y=x) xs) > 1) xs
+fun check_pat (p:pattern) = all_variable_names p !> has_duplicates
 
-fun check_pat (p:pattern) =
-    all_variable_names p !> has_duplicates
