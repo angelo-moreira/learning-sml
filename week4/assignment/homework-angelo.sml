@@ -6,10 +6,6 @@ datatype pattern = Wildcard
      | TupleP of pattern list
      | ConstructorP of string * pattern
 
-datatype valu = Const of int
-        | Unit
-        | Tuple of valu list
-        | Constructor of string * valu
 
 fun g f1 f2 p =
     let 
@@ -52,30 +48,21 @@ val longest_capitalized = longest_string3 o only_capitals
 val rev_string = implode o rev o explode
 
 fun first_answer f xs = 
-        (List.find (fn x => case f(x) of SOME _ => true |_ => false ) xs) 
-        !> (fn x => case x of SOME i => i |_ => raise NoAnswer)
+    case xs of
+        [] => raise NoAnswer
+        | x::xs' => case f x of SOME i => i | NONE => first_answer f xs'
 
 fun all_answers f xs =
-        case List.filter (fn x => case f x of SOME _ => true |_ => false) xs of
-        [] => NONE
-        | cs => SOME cs
-
-
-fun count_wildcards (p: pattern) = g (fn x => 1) (fn x => 0) p
-fun count_wild_and_variable_lengths (p: pattern) = g (fn x => 1) (fn x => size (x)) p
-
-fun count_some_var (s, p) = g (fn x => 0) (fn x => if x = s then 1 else 0) p
-
-fun all_variable_names p = 
-    case p of
-        Variable x  => [x]
-        | TupleP ps => List.foldl (fn (p, acc) => all_variable_names(p)@acc) [] ps
-        | _         => []
-
-(* first version is shorter but less efficient since filter doesnt stop when true, I wonder how I could pipe this 1st version *)
-fun has_duplicates xs = List.exists (fn x => List.length (List.filter (fn y => y=x) xs) > 1) xs
-fun has_duplicates (x::xs) = if (List.exists (fn y => x=y) xs) = true then true else has_duplicates (xs)
-| has_duplicates ([]) = false
-
-fun check_pat (p:pattern) = all_variable_names p !> has_duplicates
+    let
+        fun get_answer f xs acc =
+            case xs of
+                [] => acc
+                | x::xs' => case f x of
+                                SOME i => get_answer f xs' (acc@i)
+                                | NONE => get_answer f xs' acc
+    in
+        case (get_answer f xs []) of
+            [] => NONE
+            | all_xs => SOME all_xs
+    end
 
