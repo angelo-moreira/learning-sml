@@ -108,15 +108,12 @@ datatype valu = Const of int
         | Tuple of valu list
         | Constructor of string * valu
 
-(* fun get_all_answers f xs = case all_answers f xs of SOME i => i |_ => [] *)
-(* val filter_pattern = fn x => 
-    case x of 
-        (Variable p, v) => [(v, p)]
-        | (TupleP p, Tuple v)   => match (v,p)
-        |_              => [] *)
 
-(* fun match ((va: valu, pa: pattern)) = 
-    case (va, pa) of
-        (v, Variable p)       => SOME [(p, v)]
-        (Tuple v, TupleP p) => get_all_answers (fn x => ) (ListPair.zip (p, v)) *)
-
+fun match (vs: valu, ps: pattern) = 
+    case (ps, vs) of
+        (Wildcard, _)       => SOME []
+      | (UnitP, Unit)       => SOME []
+      | (ConstP p, Const v) => if p = v then SOME [] else NONE
+      | (Variable p, v)     => SOME [(p, v)]
+      | (TupleP p, Tuple v) => all_answers (fn (v', p') => match (v', p')) (ListPair.zip (v, p))
+      | (ConstructorP (c1, c2), Constructor (d1,d2)) => if c1 = d1 then match (d2, c2) else NONE

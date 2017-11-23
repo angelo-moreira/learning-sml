@@ -39,7 +39,5 @@ val test11a = match (
                 , TupleP [Variable "a", Wildcard, Variable "c0"              , ConstructorP ("c1", Variable "c1")]
             ) = SOME [("c1",Const 3),("c0",Constructor ("c0",Const 3)),("a",Const 3)]
 
-match (Tuple [Const 3, Unit, Constructor ("c0", Const 3), Constructor ("c1", Const 3)], TupleP [Variable "a", Wildcard, Variable "c0", ConstructorP ("c1", Variable "c1")]) = SOME [("c1",Const 3),("c0",Constructor ("c0",Const 3)),("a",Const 3)]
-
 val test12 = first_match Unit [UnitP] = SOME []
 
