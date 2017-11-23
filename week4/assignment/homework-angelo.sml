@@ -56,13 +56,67 @@ fun all_answers f xs =
     let
         fun get_answer f xs acc =
             case xs of
-                [] => acc
+                [] => SOME acc
                 | x::xs' => case f x of
                                 SOME i => get_answer f xs' (acc@i)
-                                | NONE => get_answer f xs' acc
+                                | NONE => NONE
     in
-        case (get_answer f xs []) of
-            [] => NONE
-            | all_xs => SOME all_xs
+        get_answer f xs []
     end
+
+
+fun count_wildcards (p: pattern) = g (fn x => 1) (fn x => 0) p
+fun count_wild_and_variable_lengths (p: pattern) = g (fn x => 1) (fn x => size (x)) p
+
+fun count_some_var (s, p) = g (fn x => 0) (fn x => if x = s then 1 else 0) p
+
+fun all_variable_names p = 
+    case p of
+        Variable x  => [x]
+        | TupleP ps => List.foldl (fn (p, acc) => all_variable_names(p)@acc) [] ps
+        | _         => []
+
+(* first version is shorter but less efficient since filter doesnt stop when true, I wonder how I could pipe this 1st version *)
+(* fun has_duplicates xs = List.exists (fn x => List.length (List.filter (fn y => y=x) xs) > 1) xs *)
+fun has_duplicates (x::xs) = if (List.exists (fn y => x=y) xs) = true then false else has_duplicates (xs)
+| has_duplicates ([]) = true
+
+fun check_pat (p:pattern) = all_variable_names p !> has_duplicates
+
+(* datatype pattern = Wildcard
+     | Variable of string
+     | UnitP
+     | ConstP of int
+     | TupleP of pattern list
+     | ConstructorP of string * pattern *)
+
+(* fun g f1 f2 p =
+    let 
+        val r = g f1 f2 
+    in
+        case p of
+            Wildcard            => f1 ()
+            | Variable x        => f2 x
+            | TupleP ps         => List.foldl (fn (p,i) => (r p) + i) 0 ps
+            | ConstructorP(_,p) => r p
+            | _                 => 0
+    end *)
+
+
+datatype valu = Const of int
+        | Unit
+        | Tuple of valu list
+        | Constructor of string * valu
+
+(* fun get_all_answers f xs = case all_answers f xs of SOME i => i |_ => [] *)
+(* val filter_pattern = fn x => 
+    case x of 
+        (Variable p, v) => [(v, p)]
+        | (TupleP p, Tuple v)   => match (v,p)
+        |_              => [] *)
+
+(* fun match ((va: valu, pa: pattern)) = 
+    case (va, pa) of
+        (v, Variable p)       => SOME [(p, v)]
+        (Tuple v, TupleP p) => get_all_answers (fn x => ) (ListPair.zip (p, v)) *)
 
