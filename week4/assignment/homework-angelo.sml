@@ -39,14 +39,14 @@ exception NoAnswer
 infix !>
 fun x !> f = f x
 
-fun only_capitals sl = List.filter (fn x => String.sub(x, 0) !> Char.isUpper) sl
+fun only_capitals (sl) = List.filter (fn x => String.sub(x, 0) !> Char.isUpper) sl
 fun longest_string1 xs = List.foldl (fn (x, y) => if size x > size y then x else y) "" xs;
 fun longest_string2 xs = List.foldl (fn (x, y) => if size x >= size y then x else y) "" xs;
 
-fun longest_string_helper f xs s = List.foldl (fn (x, y) => if f (size x,size y) = true then x else y) s xs
+fun longest_string_helper f xs = List.foldl (fn (x, y) => if f (size x,size y) = true then x else y) "" xs
 
-val longest_string3 = fn xs => longest_string_helper (fn (x,y) => x > y) xs ""
-val longest_string4 = fn xs => longest_string_helper (fn (x,y) => x >= y) xs ""
+val longest_string3 = fn xs => longest_string_helper (fn (x,y) => x > y) xs
+val longest_string4 = fn xs => longest_string_helper (fn (x,y) => x >= y) xs
 
 val longest_capitalized = longest_string3 o only_capitals
 
@@ -94,9 +94,12 @@ fun match (vs: valu, ps: pattern) =
       | (UnitP, Unit)       => SOME []
       | (ConstP p, Const v) => if p = v then SOME [] else NONE
       | (Variable p, v)     => SOME [(p, v)]
-      | (TupleP p, Tuple v) => all_answers (fn (v', p') => match (v', p')) (ListPair.zip (v, p))
+      | (TupleP p, Tuple v) => if length p = length v 
+                               then all_answers (fn (v', p') => match (v', p')) (ListPair.zip (v, p))
+                               else NONE
       | (ConstructorP (c1, c2), Constructor (d1,d2)) => if c1 = d1 then match (d2, c2) else NONE
       | _ => NONE
+
 
 fun first_match (v: valu, ps: pattern list) =
     ( SOME (first_answer (fn p => match (v, p)) ps) ) handle NoAnswer => NONE
