@@ -6,6 +6,11 @@ datatype pattern = Wildcard
      | TupleP of pattern list
      | ConstructorP of string * pattern
 
+datatype valu = Const of int
+        | Unit
+        | Tuple of valu list
+        | Constructor of string * valu
+
 
 fun g f1 f2 p =
     let 
@@ -83,32 +88,6 @@ fun has_duplicates (x::xs) = if (List.exists (fn y => x=y) xs) = true then false
 
 fun check_pat (p:pattern) = all_variable_names p !> has_duplicates
 
-(* datatype pattern = Wildcard
-     | Variable of string
-     | UnitP
-     | ConstP of int
-     | TupleP of pattern list
-     | ConstructorP of string * pattern *)
-
-(* fun g f1 f2 p =
-    let 
-        val r = g f1 f2 
-    in
-        case p of
-            Wildcard            => f1 ()
-            | Variable x        => f2 x
-            | TupleP ps         => List.foldl (fn (p,i) => (r p) + i) 0 ps
-            | ConstructorP(_,p) => r p
-            | _                 => 0
-    end *)
-
-
-datatype valu = Const of int
-        | Unit
-        | Tuple of valu list
-        | Constructor of string * valu
-
-
 fun match (vs: valu, ps: pattern) = 
     case (ps, vs) of
         (Wildcard, _)       => SOME []
@@ -117,3 +96,7 @@ fun match (vs: valu, ps: pattern) =
       | (Variable p, v)     => SOME [(p, v)]
       | (TupleP p, Tuple v) => all_answers (fn (v', p') => match (v', p')) (ListPair.zip (v, p))
       | (ConstructorP (c1, c2), Constructor (d1,d2)) => if c1 = d1 then match (d2, c2) else NONE
+      | _ => NONE
+
+fun first_match (v: valu, ps: pattern list) =
+    ( SOME (first_answer (fn p => match (v, p)) ps) ) handle NoAnswer => NONE
