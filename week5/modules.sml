@@ -7,7 +7,7 @@ struct
         else x * fact (x-1)
 
     val half_pi = Math.pi / 2.0
-    fun doubler = y = y + y
+    fun doubler y = y + y
 end
 
 val pi = MyMathLib.half_pi + MyMathLib.half_pi
